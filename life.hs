@@ -1,4 +1,4 @@
-data Point = Point Integer Integer deriving Show
+data Point = Point Integer Integer deriving (Show, Eq)
 
 tick :: [Point] -> [Point]
 tick x = x
@@ -18,6 +18,16 @@ count_neighbours pt (x:xs) =
     let single_neighbour = if is_neighbour pt x then 1 else 0
     in  single_neighbour + count_neighbours pt xs
 
+will_live :: Point -> [Point] -> Bool
+will_live pt pts
+    | (not is_pt_alive) && number_of_neighbours == 3 = True
+    | (not is_pt_alive) && number_of_neighbours /= 3 = False
+    | number_of_neighbours < 2 = False
+    | number_of_neighbours > 3 = False
+    | otherwise = True
+    where   number_of_neighbours = count_neighbours pt pts
+            is_pt_alive = pt `elem` pts
+
 assert_equal :: Eq a => Show a => a -> a -> IO()
 assert_equal x y
     | x == y = putStrLn "."
@@ -30,4 +40,9 @@ main = do
         assert_equal False (is_neighbour (Point 321 1) (Point 1 1))
         assert_equal 0 (count_neighbours (Point 0 0) [(Point 3 4)])
         assert_equal 1 (count_neighbours (Point 0 0) [(Point 1 1)])
+        assert_equal False (will_live (Point 0 0) [])
+        assert_equal False (will_live (Point 0 0) [(Point 1 1)])
+        assert_equal True (will_live (Point 0 0) [(Point 0 0), (Point 1 0), (Point 1 1)])
+        assert_equal True (will_live (Point 0 0) [(Point 0 1), (Point 1 0), (Point 1 1)])
+        assert_equal False (will_live (Point 0 0) [(Point 1 0), (Point 1 1)])
 
