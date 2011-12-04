@@ -1,7 +1,9 @@
+import Data.List
 data Point = Point Integer Integer deriving (Show, Eq)
 
 tick :: [Point] -> [Point]
-tick x = x
+tick world = [ cell | cell <- cells_involved_in_this_tick, will_live cell world]
+    where cells_involved_in_this_tick = world `union` (flatten (map neighbours world))
 
 is_neighbour :: Point -> Point -> Bool
 is_neighbour (Point x1 y1) (Point x2 y2)
@@ -21,12 +23,21 @@ count_neighbours pt (x:xs) =
 will_live :: Point -> [Point] -> Bool
 will_live pt pts
     | (not is_pt_alive) && number_of_neighbours == 3 = True
-    | (not is_pt_alive) && number_of_neighbours /= 3 = False
+    | (not is_pt_alive) = False
     | number_of_neighbours < 2 = False
     | number_of_neighbours > 3 = False
     | otherwise = True
     where   number_of_neighbours = count_neighbours pt pts
             is_pt_alive = pt `elem` pts
+
+neighbours :: Point -> [Point]
+neighbours (Point x y) = [(Point (x-1) (y-1)), (Point x (y-1)), (Point (x+1) (y-1)),
+                          (Point (x-1) y),                  (Point (x+1) y),
+                          (Point (x-1) (y+1)), (Point x (y+1)), (Point (x+1) (y+1))]
+
+flatten :: [[a]] -> [a]
+flatten [] = []
+flatten (x:xs) = x ++ (flatten xs) 
 
 assert_equal :: Eq a => Show a => a -> a -> IO()
 assert_equal x y
