@@ -35,13 +35,29 @@ neighbours (Point x y) = [(Point (x-1) (y-1)), (Point x (y-1)), (Point (x+1) (y-
                           (Point (x-1) y),                  (Point (x+1) y),
                           (Point (x-1) (y+1)), (Point x (y+1)), (Point (x+1) (y+1))]
 
--- Main game entry
+-- The game
 
 life :: Int -> [Point] -> IO()
 life 0 _ = return ()
 life gens world = do
     putStrLn $ show_world world dimensions
     life (gens-1) (tick world)
+    where dimensions = world_dimensions world
+
+-- Run game from stdin
+
+main = interact (show_gens 10 . parse_points (Point 0 0))
+
+parse_points :: Point -> [Char] -> [Point]
+parse_points _ [] = []
+parse_points (Point x y) (c:cs)
+    | c == '.' = parse_points (Point (x+1) y) cs
+    | c == '\n' = parse_points (Point 0 (y+1)) cs
+    | otherwise = (Point x y) : parse_points (Point (x+1) y) cs
+
+show_gens :: Int -> [Point] -> [Char]
+show_gens 0 _ = []
+show_gens gen world = show_world world dimensions ++ "\n" ++ show_gens (gen-1) (tick world)
     where dimensions = world_dimensions world
 
 -- Display
@@ -86,8 +102,8 @@ assert_equal x y
     | otherwise = putStrLn ("Expected " ++ show x ++ ", got " ++ show y)
 
 
-main :: IO ()
-main = do  
+test :: IO ()
+test = do  
         assert_equal True (is_neighbour (Point 1 1) (Point 1 2))
         assert_equal False (is_neighbour (Point 1 1) (Point 1 1))
         assert_equal False (is_neighbour (Point 321 1) (Point 1 1))
