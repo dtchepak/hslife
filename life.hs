@@ -48,14 +48,14 @@ life gens world = do
 
 show_world :: [Point] -> (Point, Point) -> [Char]
 show_world world ((Point startX startY), (Point endX endY)) =
-    lineBreakAt cells_per_row [ show_point p (p `elem` world) | p<-all_points ]
+    lineBreakAt cells_per_row [ show_point (p `elem` world) | p<-all_points ]
     where
         all_points = [(Point x y) | x<-[startX..endX], y<-[startY..endY]]
         cells_per_row = endX - startX + 1
 
-show_point :: Point -> Bool -> Char
-show_point pt True = 'X'
-show_point pt False = '_'
+show_point :: Bool -> Char
+show_point True = '*'
+show_point False = '-'
 
 get_row :: Int -> [Point] -> [Point]
 get_row rowCoord world = [(Point x y) | (Point x y)<-world, y == rowCoord]
@@ -99,3 +99,6 @@ main = do
         assert_equal True (will_live (Point 0 0) [(Point 0 1), (Point 1 0), (Point 1 1)])
         assert_equal False (will_live (Point 0 0) [(Point 1 0), (Point 1 1)])
 
+-- Examples
+beacon = [(Point 0 0), (Point 0 1), (Point 1 0), (Point 1 1), (Point 2 2), (Point 2 3), (Point 3 2), (Point 3 3)]
+blinker = [(Point 0 0), (Point 0 1), (Point 0 2)]
