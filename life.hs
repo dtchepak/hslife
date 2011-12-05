@@ -35,12 +35,16 @@ neighbours (Point x y) = [(Point (x-1) (y-1)), (Point x (y-1)), (Point (x+1) (y-
                           (Point (x-1) y),                  (Point (x+1) y),
                           (Point (x-1) (y+1)), (Point x (y+1)), (Point (x+1) (y+1))]
 
+-- Main game entry
+
 life :: Int -> [Point] -> IO()
 life 0 _ = return ()
 life gens world = do
     putStrLn $ show_world world dimensions
     life (gens-1) (tick world)
     where dimensions = world_dimensions world
+
+-- Display
 
 show_world :: [Point] -> (Point, Point) -> [Char]
 show_world world ((Point startX startY), (Point endX endY)) =
@@ -64,6 +68,8 @@ world_dimensions cells = ((Point min_x min_y), (Point max_x max_y))
           max_y = maximum [ y | (Point x y) <- cells ]
           min_y = minimum [ y | (Point x y) <- cells ]
 
+-- Utils
+
 flatten :: [[a]] -> [a]
 flatten [] = []
 flatten (x:xs) = x ++ (flatten xs) 
@@ -72,6 +78,7 @@ lineBreakAt :: Int -> [Char] -> [Char]
 lineBreakAt n [] = []
 lineBreakAt n s = take n s ++ "\n" ++ (lineBreakAt n $ drop n s)
 
+-- Tests
 
 assert_equal :: Eq a => Show a => a -> a -> IO()
 assert_equal x y
