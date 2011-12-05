@@ -35,32 +35,21 @@ neighbours (Point x y) = [(Point (x-1) (y-1)), (Point x (y-1)), (Point (x+1) (y-
                           (Point (x-1) y),                  (Point (x+1) y),
                           (Point (x-1) (y+1)), (Point x (y+1)), (Point (x+1) (y+1))]
 
--- The game
+-- Run game from GHCI
 
 life :: Int -> [Point] -> IO()
-life 0 _ = return ()
-life gens world = do
-    putStrLn $ show_world world dimensions
-    life (gens-1) (tick world)
-    where dimensions = world_dimensions world
+life gens world = putStrLn $ show_gens gens world
 
 -- Run game from stdin
 
 main = interact (show_gens 10 . parse_points (Point 0 0))
 
-parse_points :: Point -> [Char] -> [Point]
-parse_points _ [] = []
-parse_points (Point x y) (c:cs)
-    | c == '.' = parse_points (Point (x+1) y) cs
-    | c == '\n' = parse_points (Point 0 (y+1)) cs
-    | otherwise = (Point x y) : parse_points (Point (x+1) y) cs
+-- Display
 
 show_gens :: Int -> [Point] -> [Char]
 show_gens 0 _ = []
 show_gens gen world = show_world world dimensions ++ "\n" ++ show_gens (gen-1) (tick world)
     where dimensions = world_dimensions world
-
--- Display
 
 show_world :: [Point] -> (Point, Point) -> [Char]
 show_world world ((Point startX startY), (Point endX endY)) =
@@ -69,13 +58,6 @@ show_world world ((Point startX startY), (Point endX endY)) =
         all_points = [(Point x y) | x<-[startX..endX], y<-[startY..endY]]
         cells_per_row = endX - startX + 1
 
-show_point :: Bool -> Char
-show_point True = '*'
-show_point False = '-'
-
-get_row :: Int -> [Point] -> [Point]
-get_row rowCoord world = [(Point x y) | (Point x y)<-world, y == rowCoord]
-
 world_dimensions :: [Point] -> (Point, Point)
 world_dimensions [] = ((Point 0 0), (Point 0 0))
 world_dimensions cells = ((Point min_x min_y), (Point max_x max_y))
@@ -83,6 +65,18 @@ world_dimensions cells = ((Point min_x min_y), (Point max_x max_y))
           min_x = minimum [ x | (Point x y) <- cells ]
           max_y = maximum [ y | (Point x y) <- cells ]
           min_y = minimum [ y | (Point x y) <- cells ]
+
+-- Converting between Points and Chars
+parse_points :: Point -> [Char] -> [Point]
+parse_points _ [] = []
+parse_points (Point x y) (c:cs)
+    | c == '*' = (Point x y) : parse_points (Point (x+1) y) cs
+    | c == '\n' = parse_points (Point 0 (y+1)) cs
+    | otherwise = parse_points (Point (x+1) y) cs
+
+show_point :: Bool -> Char
+show_point True = '*'
+show_point False = '.'
 
 -- Utils
 
